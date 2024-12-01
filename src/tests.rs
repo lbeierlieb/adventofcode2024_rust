@@ -1,6 +1,5 @@
 use std::fs::read_to_string;
 
-
 #[test]
 fn day1_task1() {
     let input = read_to_string("inputs/day1_task1_test").unwrap();
