@@ -18,14 +18,32 @@ fn is_report_valid(report: &[u64]) -> bool {
     (all_increasing || all_decreasing) && small_steps
 }
 
-pub fn task_one(input: String) -> u64 {
-    let reports = numbers_per_line(&input);
+fn is_report_valid_one_removed(report: &[u64]) -> bool {
+    for i in 0..report.len() {
+        let mut shortened_report = report.to_vec();
+        shortened_report.remove(i);
+        if is_report_valid(&shortened_report) {
+            return true;
+        }
+    }
+    false
+}
+
+fn process<F>(input: &str, report_checking_function: F) -> u64
+where
+    F: Fn(&[u64]) -> bool,
+{
+    let reports = numbers_per_line(input);
     reports
         .into_iter()
-        .filter(|report| is_report_valid(report))
+        .filter(|report| report_checking_function(report))
         .count() as u64
 }
 
+pub fn task_one(input: String) -> u64 {
+    process(&input, is_report_valid)
+}
+
 pub fn task_two(input: String) -> u64 {
-    0
+    process(&input, is_report_valid_one_removed)
 }
