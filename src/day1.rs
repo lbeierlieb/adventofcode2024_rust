@@ -1,14 +1,6 @@
 use std::iter::zip;
 
-use regex::Regex;
-
-fn numstring_to_numbers(input: &str) -> Vec<u64> {
-    let re_num = Regex::new(r"[0-9]+").unwrap();
-    re_num
-        .captures_iter(input)
-        .filter_map(|cap| cap[0].parse::<u64>().ok())
-        .collect()
-}
+use crate::helpers::parsing::numstring_to_numbers;
 
 fn get_nth_row_numbers(n: usize, input: &str) -> Vec<u64> {
     numstring_to_numbers(input)
