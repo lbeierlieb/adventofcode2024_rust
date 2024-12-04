@@ -55,6 +55,15 @@ impl Grid {
             .flat_map(|x| (0..self.get_height()).map(move |y| (x, y)))
             .collect()
     }
+
+    fn get_cross_around(&self, x: usize, y: usize) -> Option<[[char; 2]; 2]> {
+        let top_left = self.get_char_at_signed(x as isize - 1, y as isize - 1)?;
+        let top_right = self.get_char_at_signed(x as isize + 1, y as isize - 1)?;
+        let btm_right = self.get_char_at_signed(x as isize + 1, y as isize + 1)?;
+        let btm_left = self.get_char_at_signed(x as isize - 1, y as isize + 1)?;
+
+        Some([[top_left, btm_right], [top_right, btm_left]])
+    }
 }
 
 fn directions() -> Vec<(isize, isize)> {
@@ -70,6 +79,14 @@ fn directions() -> Vec<(isize, isize)> {
     ]
 }
 
+/// This functions only checks the outer cross for M and S.
+/// It is not checked whether the center piece is an A
+fn is_cross_mas(cross: &[[char; 2]; 2]) -> bool {
+    cross
+        .iter()
+        .all(|crossline| crossline.contains(&'M') && crossline.contains(&'S'))
+}
+
 pub fn task_one(input: String) -> u64 {
     let grid = Grid::parse(&input);
     grid.get_all_coords()
@@ -80,5 +97,11 @@ pub fn task_one(input: String) -> u64 {
 }
 
 pub fn task_two(input: String) -> u64 {
-    0
+    let grid = Grid::parse(&input);
+    grid.get_all_coords()
+        .into_iter()
+        .filter(|(x, y)| grid.get_char_at(*x, *y) == Some('A'))
+        .filter_map(|(x, y)| grid.get_cross_around(x, y))
+        .filter(|word| is_cross_mas(word))
+        .count() as u64
 }
