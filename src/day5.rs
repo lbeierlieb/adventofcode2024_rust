@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use regex::Regex;
 
 use crate::helpers::parsing::numstring_to_numbers;
@@ -19,6 +21,21 @@ impl Rule {
 
     fn is_broken(&self, fst: u64, snd: u64) -> bool {
         fst == self.bigger && snd == self.smaller
+    }
+
+    fn compare(a: u64, b: u64, rules: &[Rule]) -> Ordering {
+        if a == b {
+            return Ordering::Equal;
+        }
+        for rule in rules {
+            if rule.smaller == a && rule.bigger == b {
+                return Ordering::Less;
+            }
+            if rule.smaller == b && rule.bigger == a {
+                return Ordering::Greater;
+            }
+        }
+        panic!("no rule could be applied to compare {} and {}", a, b);
     }
 }
 
@@ -43,13 +60,19 @@ impl Update {
         !rules.iter().any(|rule| self.breaks_rule(rule))
     }
 
+    fn sorted(&self, rules: &[Rule]) -> Update {
+        let mut copy = self.pages.clone();
+        copy.sort_by(|a, b| Rule::compare(*a, *b, &rules));
+        Update { pages: copy }
+    }
+
     fn get_middle_value(&self) -> u64 {
         let middle_index = self.pages.len() / 2;
         self.pages[middle_index]
     }
 }
 
-pub fn task_one(input: String) -> u64 {
+fn parse(input: &str) -> (Vec<Rule>, Vec<Update>) {
     let mut split_input = input.split("\n\n");
     let rules = split_input.next().unwrap();
     let updates = split_input.next().unwrap();
@@ -64,6 +87,12 @@ pub fn task_one(input: String) -> u64 {
         .map(|line| Update::parse(line))
         .collect::<Vec<_>>();
 
+    (rules, updates)
+}
+
+pub fn task_one(input: String) -> u64 {
+    let (rules, updates) = parse(&input);
+
     updates
         .iter()
         .filter(|update| update.is_valid(&rules))
@@ -72,5 +101,12 @@ pub fn task_one(input: String) -> u64 {
 }
 
 pub fn task_two(input: String) -> u64 {
-    0
+    let (rules, updates) = parse(&input);
+
+    updates
+        .iter()
+        .filter(|update| !update.is_valid(&rules))
+        .map(|update| update.sorted(&rules))
+        .map(|sorted_update| sorted_update.get_middle_value())
+        .sum()
 }

@@ -66,6 +66,6 @@ fn day5_task1() {
 #[test]
 fn day5_task2() {
     let input = read_to_string("inputs/day5_task2_test").unwrap();
-    let result = 9;
+    let result = 123;
     assert_eq!(result, crate::day5::task_two(input));
 }
