@@ -6,6 +6,7 @@ mod day1;
 mod day2;
 mod day3;
 mod day4;
+mod day5;
 
 #[cfg(test)]
 mod tests;
@@ -42,5 +43,13 @@ fn main() {
     println!(
         "4.2: {}",
         day4::task_two(read_to_string("inputs/day4").unwrap())
+    );
+    println!(
+        "5.1: {}",
+        day5::task_one(read_to_string("inputs/day5").unwrap())
+    );
+    println!(
+        "5.2: {}",
+        day5::task_two(read_to_string("inputs/day5").unwrap())
     );
 }
