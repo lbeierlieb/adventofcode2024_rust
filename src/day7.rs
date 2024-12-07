@@ -79,20 +79,19 @@ impl<'a> PartiallySolvedEquation<'a> {
     }
 }
 
-pub fn task_one(input: String) -> u64 {
+pub fn process<const USE_CONCAT: bool>(input: &str) -> u64 {
     input
         .lines()
         .map(|line| Equation::parse(line))
-        .filter(Equation::is_solvable::<false>)
+        .filter(Equation::is_solvable::<USE_CONCAT>)
         .map(|equation| equation.result)
         .sum()
 }
 
+pub fn task_one(input: String) -> u64 {
+    process::<false>(&input)
+}
+
 pub fn task_two(input: String) -> u64 {
-    input
-        .lines()
-        .map(|line| Equation::parse(line))
-        .filter(Equation::is_solvable::<true>)
-        .map(|equation| equation.result)
-        .sum()
+    process::<true>(&input)
 }
