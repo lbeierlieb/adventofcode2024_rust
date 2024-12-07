@@ -17,7 +17,7 @@ impl Equation {
         }
     }
 
-    fn is_solvable(&self) -> bool {
+    fn is_solvable<const USE_CONCAT: bool>(&self) -> bool {
         let fst = self.operands[0];
         let snd = self.operands[1];
         let mut partial = PartiallySolvedEquation {
@@ -25,11 +25,17 @@ impl Equation {
             accumulator: fst * snd,
             operands_left: &self.operands[2..],
         };
-        if partial.is_solvable() {
+        if partial.is_solvable::<USE_CONCAT>() {
             return true;
         }
+        if USE_CONCAT {
+            partial.accumulator = format!("{}{}", fst, snd).parse().unwrap();
+            if partial.is_solvable::<USE_CONCAT>() {
+                return true;
+            }
+        }
         partial.accumulator = fst + snd;
-        partial.is_solvable()
+        partial.is_solvable::<USE_CONCAT>()
     }
 }
 
@@ -41,7 +47,7 @@ struct PartiallySolvedEquation<'a> {
 }
 
 impl<'a> PartiallySolvedEquation<'a> {
-    fn is_solvable(&self) -> bool {
+    fn is_solvable<const USE_CONCAT: bool>(&self) -> bool {
         if self.result == self.accumulator {
             return true;
         }
@@ -57,11 +63,19 @@ impl<'a> PartiallySolvedEquation<'a> {
             accumulator: self.accumulator * self.operands_left[0],
             operands_left: &self.operands_left[1..],
         };
-        if next_partial.is_solvable() {
+        if next_partial.is_solvable::<USE_CONCAT>() {
             return true;
         }
+        if USE_CONCAT {
+            next_partial.accumulator = format!("{}{}", self.accumulator, self.operands_left[0])
+                .parse()
+                .unwrap();
+            if next_partial.is_solvable::<USE_CONCAT>() {
+                return true;
+            }
+        }
         next_partial.accumulator = self.accumulator + self.operands_left[0];
-        next_partial.is_solvable()
+        next_partial.is_solvable::<USE_CONCAT>()
     }
 }
 
@@ -69,11 +83,16 @@ pub fn task_one(input: String) -> u64 {
     input
         .lines()
         .map(|line| Equation::parse(line))
-        .filter(Equation::is_solvable)
+        .filter(Equation::is_solvable::<false>)
         .map(|equation| equation.result)
         .sum()
 }
 
 pub fn task_two(input: String) -> u64 {
-    0
+    input
+        .lines()
+        .map(|line| Equation::parse(line))
+        .filter(Equation::is_solvable::<true>)
+        .map(|equation| equation.result)
+        .sum()
 }
