@@ -83,3 +83,17 @@ fn day6_task2() {
     let result = 6;
     assert_eq!(result, crate::day6::task_two(input));
 }
+
+#[test]
+fn day7_task1() {
+    let input = read_to_string("inputs/day7_task1_test").unwrap();
+    let result = 3749;
+    assert_eq!(result, crate::day7::task_one(input));
+}
+
+#[test]
+fn day7_task2() {
+    let input = read_to_string("inputs/day7_task2_test").unwrap();
+    let result = 7;
+    assert_eq!(result, crate::day7::task_two(input));
+}
