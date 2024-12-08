@@ -108,6 +108,6 @@ fn day8_task1() {
 #[test]
 fn day8_task2() {
     let input = read_to_string("inputs/day8_task2_test").unwrap();
-    let result = 11388;
+    let result = 34;
     assert_eq!(result, crate::day8::task_two(input));
 }

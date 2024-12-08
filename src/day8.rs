@@ -55,8 +55,18 @@ impl TowerMap {
         towers
             .iter()
             .flat_map(|tower0| {
-                towers.iter().filter_map(|tower1| {
-                    tower0.calculate_antinode_with(tower1, self.width, self.height)
+                towers.iter().flat_map(|tower1| {
+                    if PROPAGATE {
+                        tower0
+                            .calculate_antinodes_with(tower1, self.width, self.height)
+                            .into_iter()
+                    } else {
+                        tower0
+                            .calculate_antinode_with(tower1, self.width, self.height)
+                            .into_iter()
+                            .collect::<Vec<_>>()
+                            .into_iter()
+                    }
                 })
             })
             .collect()
@@ -107,6 +117,34 @@ impl Tower {
 
         Some((antinode_x, antinode_y))
     }
+
+    fn calculate_antinodes_with(&self, other: &Tower, width: u64, height: u64) -> Vec<(u64, u64)> {
+        let mut antinodes = Vec::new();
+        if self.location == other.location {
+            return antinodes;
+        }
+        let dx = other.location.0 as i64 - self.location.0 as i64;
+        let dy = other.location.1 as i64 - self.location.1 as i64;
+        let mut i = 1;
+        loop {
+            let antinode_x = self.location.0 as i64 + i * dx;
+            let antinode_y = self.location.1 as i64 + i * dy;
+
+            if antinode_x < 0 || antinode_y < 0 {
+                break;
+            }
+            let antinode_x = antinode_x as u64;
+            let antinode_y = antinode_y as u64;
+            if antinode_x >= width || antinode_y >= height {
+                break;
+            }
+
+            antinodes.push((antinode_x, antinode_y));
+            i += 1
+        }
+
+        antinodes
+    }
 }
 
 pub fn task_one(input: String) -> u64 {
@@ -114,5 +152,5 @@ pub fn task_one(input: String) -> u64 {
 }
 
 pub fn task_two(input: String) -> u64 {
-    0
+    TowerMap::parse(&input).get_all_antinodes::<true>().len() as u64
 }
