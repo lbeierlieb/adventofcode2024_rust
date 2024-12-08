@@ -44,7 +44,7 @@ impl TowerMap {
     fn get_all_antinodes<const PROPAGATE: bool>(&self) -> HashSet<(u64, u64)> {
         self.towers
             .values()
-            .flat_map(|towers| self.get_all_antinodes_from_towers(towers))
+            .flat_map(|towers| self.get_all_antinodes_from_towers::<PROPAGATE>(towers))
             .collect()
     }
 
