@@ -41,28 +41,24 @@ impl TowerMap {
         }
         hmap
     }
-    fn get_all_antinodes(&self) -> Vec<AntiNode> {
+    fn get_all_antinodes<const PROPAGATE: bool>(&self) -> HashSet<(u64, u64)> {
         self.towers
             .values()
-            .flat_map(|towers| Self::get_all_antinodes_from_towers(towers))
+            .flat_map(|towers| self.get_all_antinodes_from_towers(towers))
             .collect()
     }
 
-    fn get_all_antinodes_from_towers(towers: &[Tower]) -> Vec<AntiNode> {
+    fn get_all_antinodes_from_towers<const PROPAGATE: bool>(
+        &self,
+        towers: &[Tower],
+    ) -> Vec<(u64, u64)> {
         towers
             .iter()
             .flat_map(|tower0| {
-                towers
-                    .iter()
-                    .filter_map(|tower1| tower0.calculate_antinode_with(tower1))
+                towers.iter().filter_map(|tower1| {
+                    tower0.calculate_antinode_with(tower1, self.width, self.height)
+                })
             })
-            .collect()
-    }
-
-    fn get_inbound_antinode_locations(&self) -> HashSet<(u64, u64)> {
-        self.get_all_antinodes()
-            .into_iter()
-            .filter_map(|antinode| antinode.get_valid_location(self.width - 1, self.height - 1))
             .collect()
     }
 }
@@ -86,7 +82,12 @@ impl Tower {
         }
     }
 
-    fn calculate_antinode_with(&self, other: &Tower) -> Option<AntiNode> {
+    fn calculate_antinode_with(
+        &self,
+        other: &Tower,
+        width: u64,
+        height: u64,
+    ) -> Option<(u64, u64)> {
         if self.location == other.location {
             return None;
         }
@@ -95,43 +96,21 @@ impl Tower {
         let antinode_x = self.location.0 as i64 + 2 * dx;
         let antinode_y = self.location.1 as i64 + 2 * dy;
 
-        Some(AntiNode::new(self.frequency, (antinode_x, antinode_y)))
-    }
-}
-
-#[derive(Debug)]
-struct AntiNode {
-    frequency: char,
-    location: (i64, i64),
-}
-
-impl AntiNode {
-    fn new(frequency: char, location: (i64, i64)) -> AntiNode {
-        AntiNode {
-            frequency,
-            location,
+        if antinode_x < 0 || antinode_y < 0 {
+            return None;
         }
-    }
-
-    fn is_in_bounds(&self, max_x: u64, max_y: u64) -> bool {
-        let (x, y) = self.location;
-        x >= 0 && x <= max_x as i64 && y >= 0 && y <= max_y as i64
-    }
-
-    fn get_valid_location(&self, max_x: u64, max_y: u64) -> Option<(u64, u64)> {
-        if self.is_in_bounds(max_x, max_y) {
-            let (x, y) = self.location;
-            Some((x as u64, y as u64))
-        } else {
-            None
+        let antinode_x = antinode_x as u64;
+        let antinode_y = antinode_y as u64;
+        if antinode_x >= width || antinode_y >= height {
+            return None;
         }
+
+        Some((antinode_x, antinode_y))
     }
 }
 
 pub fn task_one(input: String) -> u64 {
-    TowerMap::parse(&input)
-        .get_inbound_antinode_locations()
-        .len() as u64
+    TowerMap::parse(&input).get_all_antinodes::<false>().len() as u64
 }
 
 pub fn task_two(input: String) -> u64 {
