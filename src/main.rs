@@ -3,6 +3,7 @@ use std::fs::read_to_string;
 mod helpers;
 
 mod day1;
+mod day10;
 mod day2;
 mod day3;
 mod day4;
@@ -87,5 +88,13 @@ fn main() {
     println!(
         "9.2: {}",
         day9::task_two(read_to_string("inputs/day9").unwrap())
+    );
+    println!(
+        "10.1: {}",
+        day10::task_one(read_to_string("inputs/day10").unwrap())
+    );
+    println!(
+        "10.2: {}",
+        day10::task_two(read_to_string("inputs/day10").unwrap())
     );
 }
