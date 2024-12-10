@@ -56,13 +56,42 @@ impl TopoMap {
             .flat_map(|(dx, dy)| self.num_trails_at_rec(x + dx, y + dy, height + 1))
             .collect()
     }
+
+    fn overall_rating(&self) -> u64 {
+        let map_height = self.heights.len();
+        let map_width = self.heights[0].len();
+
+        (0..map_height)
+            .flat_map(|y| (0..map_width).map(move |x| self.trailhead_rating(x, y)))
+            .sum()
+    }
+
+    fn trailhead_rating(&self, x: usize, y: usize) -> u64 {
+        self.trailhead_rating_rec(x as isize, y as isize, 0)
+    }
+
+    fn trailhead_rating_rec(&self, x: isize, y: isize, height: u8) -> u64 {
+        let cur_height = match self.get(x, y) {
+            None => 0, // x, y out of bounds
+            Some(height) => height,
+        };
+        if height != cur_height {
+            return 0;
+        }
+        if height == 9 {
+            return 1;
+        }
+        vec![(0, 1), (0, -1), (1, 0), (-1, 0)]
+            .iter()
+            .map(|(dx, dy)| self.trailhead_rating_rec(x + dx, y + dy, height + 1))
+            .sum()
+    }
 }
 
 pub fn task_one(input: String) -> u64 {
-    let map = TopoMap::parse(&input);
-    map.num_trails()
+    TopoMap::parse(&input).num_trails()
 }
 
 pub fn task_two(input: String) -> u64 {
-    todo!();
+    TopoMap::parse(&input).overall_rating()
 }
