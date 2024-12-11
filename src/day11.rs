@@ -1,3 +1,5 @@
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
+
 use crate::helpers::parsing::numstring_to_numbers;
 
 fn update_stone(stone: u64) -> Vec<u64> {
@@ -24,25 +26,38 @@ fn update_stone(stone: u64) -> Vec<u64> {
     }
 }
 
-fn update_stones(stones: &[u64]) -> Vec<u64> {
-    stones
-        .iter()
-        .flat_map(|stone| update_stone(*stone))
-        .collect()
+fn len_rec(stones: Vec<u64>, n: usize, cache: &[RefCell<HashMap<u64, usize>>]) -> usize {
+    if n == 0 {
+        return stones.len();
+    }
+
+    let mut acc = 0;
+    for stone in stones {
+        if let Some(cached) = cache[0].borrow().get(&stone) {
+            acc += cached;
+            continue;
+        }
+        let step = update_stone(stone);
+        let len = len_rec(step, n - 1, &cache[1..]);
+        acc += len;
+
+        cache[0].borrow_mut().insert(stone, len);
+    }
+    acc
 }
 
-fn update_stones_n_times(mut stones: Vec<u64>, n: usize) -> Vec<u64> {
-    for i in 0..n {
-        stones = update_stones(&stones);
-    }
-    stones
+fn process(input: &str, n: usize) -> u64 {
+    let stones = numstring_to_numbers(input);
+    let cache = std::iter::repeat_with(|| RefCell::new(HashMap::new()))
+        .take(n)
+        .collect::<Vec<_>>();
+    len_rec(stones, n, &cache[..]) as u64
 }
 
 pub fn task_one(input: String) -> u64 {
-    let stones = numstring_to_numbers(&input);
-    update_stones_n_times(stones, 75).len() as u64
+    process(&input, 25)
 }
 
 pub fn task_two(input: String) -> u64 {
-    todo!();
+    process(&input, 75)
 }
