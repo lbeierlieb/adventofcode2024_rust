@@ -5,6 +5,7 @@ mod helpers;
 mod day1;
 mod day10;
 mod day11;
+mod day12;
 mod day2;
 mod day3;
 mod day4;
@@ -105,5 +106,13 @@ fn main() {
     println!(
         "11.2: {}",
         day11::task_two(read_to_string("inputs/day11").unwrap())
+    );
+    println!(
+        "12.1: {}",
+        day12::task_one(read_to_string("inputs/day12").unwrap())
+    );
+    println!(
+        "12.2: {}",
+        day12::task_two(read_to_string("inputs/day12").unwrap())
     );
 }
